@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import './riot.dart';
 
 class RiotWidget extends StatelessWidget {
-  static const String _title = 'MQTT Console';
+  static const String _title = 'RIoT';
   MyStatefulWidget myAppContent = MyStatefulWidget();
 
   @override
@@ -111,19 +111,19 @@ class DrawerWidget extends StatelessWidget {
       child: ListView(
         children: <Widget>[
           DrawerHeader(
-            child: Text('MQTT Console'),
+            child: Text('Road to IoT'),
             decoration: BoxDecoration(
               color: Colors.blue,
             ),
           ),
           ListTile(
-            title: Text("Settings"),
+            title: Text("Broker Settings"),
             //trailing: Icon(Icons.arrow_forward),
             onTap: () => showDialog(
               context: context,
               builder: (_) => Consumer<Riot>(
                 builder: (context, riot, child) => AlertDialog(
-                  title: Text("Settings"),
+                  title: Text("Broker Setting"),
                   content: SingleChildScrollView(
                     child: ListBody(
                       children: <Widget>[
@@ -131,6 +131,18 @@ class DrawerWidget extends StatelessWidget {
                       ],
                     ),
                   ),
+                ),
+              ),
+            ),
+          ),
+          ListTile(
+            title: Text("Topic Setting"),
+            onTap: () => showDialog(
+              context: context,
+              builder: (_) => Consumer<Riot>(
+                builder: (context, riot, child) => AlertDialog(
+                  title: Text("Topic Setting"),
+                  content: _scrollableTextField(context),
                 ),
               ),
             ),
@@ -174,3 +186,21 @@ class UrlSettingWidgetState extends State<UrlSettingWidget> {
     });
   }
 }
+
+class TopicListEditorWidget extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return _scrollableTextField(context);
+  }
+}
+
+Widget _scrollableTextField(BuildContext context) => Consumer<Riot>(
+    builder: (_, riot, __) => TextFormField(
+          keyboardType: TextInputType.multiline,
+          maxLines: null,
+          textAlignVertical: TextAlignVertical.bottom,
+          initialValue: riot.subscribTopics.join("\n"),
+          onFieldSubmitted: (text) {
+            riot.subscribe(text.split("\n").where((e) => e != "").toSet());
+          },
+        ));

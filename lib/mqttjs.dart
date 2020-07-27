@@ -8,11 +8,9 @@ external _MqttClient mqtt_connect(String url);
 
 @JS()
 class _MqttClient {
-  static _MqttClient connect(String url) {
-    return mqtt_connect(url);
-  }
-
   external subscribe(String topic);
+
+  external unsubscribe(String topic);
 
   external publish(String topic, String msg);
 
@@ -29,15 +27,23 @@ class MqttJs {
   }
 
   subscribe(String topic) {
+    print("subscribe(topic:$topic)");
     client.subscribe(topic);
   }
 
+  unsubscribe(String topic) {
+    print("unsubscribe(topic:$topic)");
+    client.unsubscribe(topic);
+  }
+
   publish(String topic, String msg) {
+    print("publish(topic:$topic,message:$msg)");
     client.publish(topic, msg);
   }
 
-   bool get connected {return client.connected;}
-
+  bool get connected {
+    return client.connected;
+  }
 
   onMessage(Function(String, Iterable<int>, Object) handler) {
     return client.on("message", allowInterop(handler));
