@@ -25,3 +25,4 @@ RUN flutter build web
 
 # Test run with SDK tool
 CMD cd $WORKTOP/$SRCPATH && flutter run --web-hostname=0.0.0.0 --web-port=80 -d web-server
+
