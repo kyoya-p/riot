@@ -29,7 +29,7 @@ class Riot extends ChangeNotifier {
 
   Future<void> reconnect() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    brokerUrl = prefs.getString("brokerUrl");
+    brokerUrl = prefs.getString("brokerUrl") ?? "ws://192.168.3/102:9887";
     notifyListeners();
     print("reconnect($brokerUrl)");
     return connect(brokerUrl);
