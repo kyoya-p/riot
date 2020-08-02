@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import './mqttjs.dart';
 import './firebase.dart';
-import 'Schema/Log.dart';
+import 'Schema/log.dart';
 
 // RIoTアプリケーションロジック
 

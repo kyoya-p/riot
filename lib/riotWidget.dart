@@ -152,7 +152,7 @@ class DrawerWidget extends StatelessWidget {
               context: context,
               builder: (_) => Consumer<Riot>(
                 builder: (context, riot, child) => AlertDialog(
-                  title: Text("Topic Setting"),
+                  title: Text("Subscrib Topic"),
                   content: _scrollableTextField(context),
                 ),
               ),
@@ -207,3 +207,4 @@ Widget _scrollableTextField(BuildContext context) => Consumer<Riot>(
             riot.subscribe(text.split("\n").where((e) => e != "").toSet());
           },
         ));
+
