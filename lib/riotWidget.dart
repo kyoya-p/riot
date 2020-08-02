@@ -17,7 +17,10 @@ class RiotWidget extends StatelessWidget {
           body: myAppContent,
           floatingActionButton: FloatingActionButton(
             child: Icon(Icons.send),
-            backgroundColor: Colors.blue,
+            backgroundColor:
+                riot.isConnected()
+                    ? Colors.blue
+                    : Colors.grey,
             onPressed: () {
               if (subWidgetKey.currentState.formKey.currentState.validate()) {
                 subWidgetKey.currentState.formKey.currentState.save();

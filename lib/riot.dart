@@ -15,8 +15,8 @@ class Riot extends ChangeNotifier {
   Set<String> subscribTopics = Set.from(["#"]);
   MqttJs mqttClient = null;
 
-  String _sendTopic;
-  String _sendMessage;
+  String _sendTopic="";
+  String _sendMessage="";
 
   MyFirebase _db = MyFirebase();
 
@@ -26,15 +26,11 @@ class Riot extends ChangeNotifier {
   }
 
   setSendMessage(String msg) {
-    print("setSendMessage($msg)");
     _sendMessage = msg;
-    //notifyListeners();
   }
 
   setSendTopic(String topic) {
-    print("setSendTopic($topic)");
     _sendTopic = topic;
-    //notifyListeners();
   }
 
   String getSendTopic() => _sendTopic;
@@ -101,6 +97,8 @@ class Riot extends ChangeNotifier {
     } else {
       _addLog("Succeeded: connect($url)");
     }
+    notifyListeners();
+
     mqttClient.onMessage((String p1, Iterable<int> p2, Object _p3) {
       String msg = utf8.decode(p2);
       _addLog("[$p1] $msg");
