@@ -4,16 +4,28 @@ import './riot.dart';
 
 class RiotWidget extends StatelessWidget {
   static const String _title = 'RIoT';
-  MyStatefulWidget myAppContent = MyStatefulWidget();
 
   @override
   Widget build(BuildContext context) {
+    GlobalKey<MyStatefulWidgetState> subWidgetKey = GlobalKey();
+    MyStatefulWidget myAppContent = MyStatefulWidget(key: subWidgetKey);
     return Consumer<Riot>(
       builder: (context, riot, child) => MaterialApp(
         title: _title,
         home: Scaffold(
           appBar: AppBar(title: const Text(_title)),
           body: myAppContent,
+          floatingActionButton: FloatingActionButton(
+            child: Icon(Icons.send),
+            backgroundColor: Colors.blue,
+            onPressed: () {
+              if (subWidgetKey.currentState.formKey.currentState.validate()) {
+                subWidgetKey.currentState.formKey.currentState.save();
+                riot.publish();
+              }
+              ;
+            },
+          ),
           drawer: DrawerWidget(),
         ),
         theme: ThemeData(
@@ -42,28 +54,37 @@ class MyStatefulWidget extends StatefulWidget {
 }
 
 class MyStatefulWidgetState extends State<MyStatefulWidget> {
-  final _formKey = GlobalKey<FormState>();
-
-  TextFormField topicField = TextFormField(
-    controller: TextEditingController(),
-    decoration: const InputDecoration(
-      hintText: 'Enter Topic String',
-    ),
-  );
-  TextFormField msgField = TextFormField(
-    controller: TextEditingController(),
-    decoration: const InputDecoration(
-      hintText: 'Enter Topic String',
-    ),
-  );
+  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
+    Consumer<Riot> topicField = Consumer<Riot>(
+      builder: (_, riot, __) => TextFormField(
+        controller: TextEditingController(),
+        decoration: const InputDecoration(
+          hintText: 'Topic',
+        ),
+        autovalidate: true,
+        validator: (value) =>
+            value.isEmpty ? "Please enter some text as topic." : null,
+        onChanged: (String value) => riot.setSendTopic(value),
+      ),
+    );
+    Consumer<Riot> msgField = Consumer<Riot>(
+      builder: (_, riot, __) => TextFormField(
+        controller: TextEditingController(),
+        decoration: const InputDecoration(
+          hintText: 'Message',
+        ),
+        onChanged: (String value) => riot.setSendMessage(value),
+      ),
+    );
+
     Widget pad16 = Padding(
       padding: const EdgeInsets.symmetric(vertical: 16.0),
     );
     Form form = Form(
-      key: _formKey,
+      key: formKey,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -83,20 +104,7 @@ class MyStatefulWidgetState extends State<MyStatefulWidget> {
           ),
           pad16,
           topicField,
-          msgField,
-          pad16,
-          Consumer<Riot>(
-            builder: (context, params, child) => FlatButton(
-              color: Colors.blue,
-              onPressed: () {
-                if (_formKey.currentState.validate()) {
-                  params.mqttClient.publish(
-                      topicField.controller.text, msgField.controller.text);
-                }
-              },
-              child: Text('Publish'),
-            ),
-          ),
+          msgField
         ],
       ),
     );
@@ -179,18 +187,10 @@ class UrlSettingWidgetState extends State<UrlSettingWidget> {
         },
         onFieldSubmitted: (String newUrl) {
           print(newUrl);
-          //showDialog(            context: context,            builder: (context) => AlertDialog(              title: Text(newUrl),            ),);
           riot.connect(newUrl);
         },
       );
     });
-  }
-}
-
-class TopicListEditorWidget extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return _scrollableTextField(context);
   }
 }
 
