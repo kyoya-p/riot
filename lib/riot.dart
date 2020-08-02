@@ -1,10 +1,7 @@
 import 'dart:core';
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:riot/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:firebase/firebase.dart';
-import 'package:firebase/firestore.dart';
 
 import './mqttjs.dart';
 import './firebase.dart';
@@ -39,6 +36,10 @@ class Riot extends ChangeNotifier {
     _sendTopic = topic;
     //notifyListeners();
   }
+
+  String getSendTopic() => _sendTopic;
+
+  String getSendMessage() => _sendMessage;
 
   subscribe(Set<String> topicList) async {
     _addLog("subscribe: [$topicList]");
@@ -140,8 +141,8 @@ class Riot extends ChangeNotifier {
         var t = e['topic'];
         var m = e['msg'];
         log = "${dt} [$t] $m\n" + log;
+        notifyListeners();
       });
     });
-    notifyListeners();
   }
 }

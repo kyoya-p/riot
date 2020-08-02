@@ -60,7 +60,7 @@ class MyStatefulWidgetState extends State<MyStatefulWidget> {
   Widget build(BuildContext context) {
     Consumer<Riot> topicField = Consumer<Riot>(
       builder: (_, riot, __) => TextFormField(
-        controller: TextEditingController(),
+        controller: TextEditingController(text: riot.getSendTopic()),
         decoration: const InputDecoration(
           hintText: 'Topic',
         ),
@@ -72,7 +72,7 @@ class MyStatefulWidgetState extends State<MyStatefulWidget> {
     );
     Consumer<Riot> msgField = Consumer<Riot>(
       builder: (_, riot, __) => TextFormField(
-        controller: TextEditingController(),
+        controller: TextEditingController(text: riot.getSendMessage()),
         decoration: const InputDecoration(
           hintText: 'Message',
         ),
