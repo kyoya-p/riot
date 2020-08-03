@@ -1,22 +1,28 @@
 import 'dart:core';
 import 'dart:convert';
+
+import 'package:firebase/firebase.dart';
+import 'package:firebase/firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import './mqttjs.dart';
 import './firebase.dart';
-import 'Schema/log.dart';
+import './schema/log.dart';
 
 // RIoTアプリケーションロジック
 
 class Riot extends ChangeNotifier {
   String brokerUrl;
   String log = "";
+
+  List<Log> _logList = List<Log>(); // 新しい順
+
   Set<String> subscribTopics = Set.from(["#"]);
   MqttJs mqttClient = null;
 
-  String _sendTopic="";
-  String _sendMessage="";
+  String _sendTopic = "";
+  String _sendMessage = "";
 
   MyFirebase _db = MyFirebase();
 
@@ -108,7 +114,7 @@ class Riot extends ChangeNotifier {
     });
 
     Set<String> subsTopicList =
-        (prefs.getStringList("subscribeTopicList") ?? ["#"]).toSet();
+    (prefs.getStringList("subscribeTopicList") ?? ["#"]).toSet();
     subscribe(subsTopicList);
   }
 
@@ -129,18 +135,54 @@ class Riot extends ChangeNotifier {
         .getDb()
         .collection("log")
         .where(
-            "timestamp", ">", now.millisecondsSinceEpoch - 1000 * 60 * 60 * 24)
+        "timestamp", ">", now.millisecondsSinceEpoch - 1000 * 60 * 60 * 24 * 7)
         .get()
         .then((value) {
       value.forEach((doc) {
         var e = doc.data();
-        print("doc=$e");
         var dt = e['datetime'];
         var t = e['topic'];
         var m = e['msg'];
         log = "${dt} [$t] $m\n" + log;
         notifyListeners();
+
       });
     });
+  }
+
+  // Sample: firebase (ソートとindex)
+  Future<Log> getLog(int index) async {
+    DateTime now = DateTime.now().toUtc();
+    print("getLog() index=$index");
+    if (index < _logList.length) return _logList[index]; //キャッシュにあればそのまま返す
+
+    // キャッシュになければDBから取得
+    int marker = _logList.length == 0 ? 0 : _logList[_logList.length - 1]
+        .timestamp; // 取得リストの開始点。キャッシュリストの末尾のtimestamp以降. キャッシュリスト空ならtimestanmp>=0(すべて)
+    await _db
+        .getDb()
+        .collection("log")
+        .where(
+        "timestamp", ">", now.millisecondsSinceEpoch - 1000 * 60 * 60 * 24 * 7)
+    //    .orderBy("timestamp", "desc") // 時刻順(新しい順)
+    //.startAt(fieldValues: [marker]) //　
+    //.limit(20) // 20要素ずつ(おそらく1ページに表示できる数)
+        .get()
+        .then((QuerySnapshot es) {
+      es.forEach((d) {
+        Map<String, dynamic> e = d.data();
+        print(e);
+        var ts = e['timestamp'];
+        var dt = DateTime.fromMillisecondsSinceEpoch(ts, isUtc: true);
+        var t = e['topic'];
+        var m = e['msg'];
+
+        Log log = Log(ts, dt, t, m);
+        _logList.add(log);
+      });
+    });
+    if (_logList.length <= index) return null;
+    print(_logList[index].msg);
+    //return _logList[index];
   }
 }

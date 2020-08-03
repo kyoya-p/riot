@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import './riot.dart';
+import './schema/log.dart';
 
 class RiotWidget extends StatelessWidget {
   static const String _title = 'RIoT';
@@ -17,10 +18,7 @@ class RiotWidget extends StatelessWidget {
           body: myAppContent,
           floatingActionButton: FloatingActionButton(
             child: Icon(Icons.send),
-            backgroundColor:
-                riot.isConnected()
-                    ? Colors.blue
-                    : Colors.grey,
+            backgroundColor: riot.isConnected() ? Colors.blue : Colors.grey,
             onPressed: () {
               if (subWidgetKey.currentState.formKey.currentState.validate()) {
                 subWidgetKey.currentState.formKey.currentState.save();
@@ -105,7 +103,10 @@ class MyStatefulWidgetState extends State<MyStatefulWidget> {
               ),
             ),
           ),
-          pad16,
+          Expanded(
+            flex: 3,
+            child: LogWidget(),
+          ),
           topicField,
           msgField
         ],
@@ -208,3 +209,32 @@ Widget _scrollableTextField(BuildContext context) => Consumer<Riot>(
           },
         ));
 
+// Sample: 項目が動的なListView
+// Sample: Firebaseデータ取得(ソート、index指定)
+class LogWidget extends StatefulWidget {
+  LogWidget({Key key}) : super(key: key);
+
+  @override
+  LogWidgetState createState() => LogWidgetState();
+}
+
+class LogWidgetState extends State<LogWidget> {
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<Riot>(
+      builder: (_, riot, __) => ListView.builder(
+          reverse: true,
+          itemBuilder: (context, index) {
+            // とにかくWidgetを先に返し、内容は後で埋める Textは変更できないのでTextを格納できるWidget
+            TextField tx = TextField(controller: TextEditingController(text: "loading..."),);
+            riot.getLog(index).then((Log log) {
+              print(log.msg);
+              tx.controller.value=TextEditingValue(text: log.msg.toString());
+            });
+            return tx;
+
+            //            return Text(index.toString());
+          }),
+    );
+  }
+}

@@ -8,6 +8,7 @@ class MyFirebase {
   String _myfirebaseName =
       "myfirebase${Random(DateTime.now().millisecondsSinceEpoch).nextInt(100000)}";
 
+  // TODO: 非同期(async)に書き換え
   Firestore getDb() {
     while (_db == null) {
       try {
