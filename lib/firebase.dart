@@ -31,6 +31,13 @@ class MyFirebase {
       }
       print("Initiate Firebase instance.");
       _db = _app.firestore();
+      _db.enablePersistence().catchError((err) {
+        if (err.code == 'failed-precondition') {
+          print("enablePersistence(): ${err.code}");
+        } else if (err.code == 'unimplemented') {
+          print("enablePersistence(): ${err.code}");
+        }
+      });
     }
     return _db;
   }
