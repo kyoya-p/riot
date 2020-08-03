@@ -8,9 +8,6 @@ MQTT monitoring tool.
 flutter run --web-hostname=0.0.0.0 --web-port=8080 -d web-server
 ```
 
-## Notes
-- Android: デフォでHTTP不可。BrokerURLは`wss:`でなければならない。
-
 ## 参考
 ##### mosquittoのwss対応
 https://qiita.com/kuboon/items/f424b84c718619460c6f
