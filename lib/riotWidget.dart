@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:selectable_autolink_text/selectable_autolink_text.dart';
 import './riot.dart';
 import './schema/log.dart';
 
@@ -18,7 +19,9 @@ class RiotWidget extends StatelessWidget {
           body: myAppContent,
           floatingActionButton: FloatingActionButton(
             child: Icon(Icons.send),
-            backgroundColor: riot.isConnected() ? Colors.blue : Colors.grey,
+            backgroundColor: riot.isConnected()
+                ? Theme.of(context).accentColor
+                : Theme.of(context).disabledColor,
             onPressed: () {
               if (subWidgetKey.currentState.formKey.currentState.validate()) {
                 subWidgetKey.currentState.formKey.currentState.save();
@@ -89,7 +92,7 @@ class MyStatefulWidgetState extends State<MyStatefulWidget> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Expanded(
+          /*Expanded(
             flex: 3,
             child: Consumer<Riot>(
               builder: (context, app, child) => Container(
@@ -102,7 +105,7 @@ class MyStatefulWidgetState extends State<MyStatefulWidget> {
                 ),
               ),
             ),
-          ),
+          ),*/
           Expanded(
             flex: 3,
             child: LogWidget(),
@@ -125,7 +128,7 @@ class DrawerWidget extends StatelessWidget {
           DrawerHeader(
             child: Text('Road to IoT'),
             decoration: BoxDecoration(
-              color: Colors.blue,
+              color: Theme.of(context).highlightColor,
             ),
           ),
           ListTile(
@@ -218,6 +221,19 @@ class LogWidget extends StatefulWidget {
   LogWidgetState createState() => LogWidgetState();
 }
 
+class LogItem extends ChangeNotifier {
+  Widget child;
+
+  LogItem(Widget w) {
+    child = w;
+  }
+
+  void setWidget(Widget w) {
+    child = w;
+    notifyListeners();
+  }
+}
+
 class LogWidgetState extends State<LogWidget> {
   @override
   Widget build(BuildContext context) {
@@ -225,16 +241,49 @@ class LogWidgetState extends State<LogWidget> {
       builder: (_, riot, __) => ListView.builder(
           reverse: true,
           itemBuilder: (context, index) {
-            // とにかくWidgetを先に返し、内容は後で埋める Textは変更できないのでTextを格納できるWidget
-            TextField tx = TextField(controller: TextEditingController(text: "loading..."),);
-            riot.getLog(index).then((Log log) {
-              print(log.msg);
-              tx.controller.value=TextEditingValue(text: log.msg.toString());
-            });
-            return tx;
+            // とにかくMutableなWidgetを先に返し、内容は後で埋める
+            LogItem logItem = LogItem(Text("loading..."));
+            Widget p= ChangeNotifierProvider(
+              create: (context) => logItem,
+              child: MutableWidget(),
 
-            //            return Text(index.toString());
+            );
+
+
+            riot.getLog(index).then((Log log) {
+              if (log != null) {
+                String dt = log.datetime.toString();
+                String t = log.topic;
+                String msg = log.msg;
+                logItem.setWidget(Text("$index: $dt [$t] $msg"));
+              } else {
+                logItem.setWidget(Text("$index: no data"));
+              }
+            });
+          /*  return ChangeNotifierProvider(
+              create: (context) => logItem,
+              child: MutableWidget(),
+            );*/
+            return p;
           }),
+    );
+  }
+}
+
+class MutableWidget extends StatefulWidget {
+  MutableWidget({Key key}) : super(key: key);
+
+  Widget mutableWidget = Text("loading..");
+
+  @override
+  MutableWidgetState createState() => MutableWidgetState();
+}
+
+class MutableWidgetState extends State<MutableWidget> {
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<LogItem>(
+      builder: (_, logItem, __) => logItem.child,
     );
   }
 }
