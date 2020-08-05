@@ -157,12 +157,12 @@ class Riot extends ChangeNotifier {
   }
   // Sample: firebase (ソートとindex)
   // Sample: 非同期関数のチェイン実行
-  Future<Log> getLog(int index) async {
+  Future<Log> getLog(int index)  {
     if (_dbMutex == null) {
       _dbMutex = _getLog(index);
     } else {
       // ignore: missing_return
-      _dbMutex = _dbMutex.then((_) async {
+      _dbMutex = _dbMutex.then((_)  {
         return _getLog(index);
       });
     };
@@ -174,22 +174,21 @@ class Riot extends ChangeNotifier {
     if (index < _logList.length) return _logList[index]; //キャッシュにあればそのまま返す
 
     // キャッシュになければDBから取得
-    int marker = _logList.length == 0 ? 0 : _logList[_logList.length - 1]
+    int marker = _logList.length == 0 ? DateTime.now().toUtc().millisecondsSinceEpoch : _logList[_logList.length - 1]
         .timestamp; // 取得リストの開始点。キャッシュリストの末尾のtimestamp以降. キャッシュリスト空ならtimestanmp>=0(すべて)
     print("getLog() index=$index  Logs: ${_logList.length} After: $marker");
     await _db
         .getDb()
         .collection("log")
-        //.where(        "timestamp", ">", now.millisecondsSinceEpoch - 1000 * 60 * 60 * 24 * 7)
+    // .where(        "timestamp", ">", now.millisecondsSinceEpoch - 1000 * 60 * 60 * 24 * 7)
         .orderBy("timestamp", "desc") // 時刻順(新しい順)
-        //.startAfter(fieldValues: [marker]) //　
+        .startAfter(fieldValues: [marker]) //　
         .limit(20)
         .get()
         .then((QuerySnapshot es) {
       es.forEach((d) {
         Log log = Log(d.data());
         _logList.add(log);
-        print("log=${log.datetime}");
       });
     });
     if (_logList.length <= index) return null;
