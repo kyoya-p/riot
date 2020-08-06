@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:selectable_autolink_text/selectable_autolink_text.dart';
-import './riot.dart';
-import './schema/log.dart';
+
+import 'package:riot/riot.dart';
+import 'package:riot/schema/log.dart';
+
+import 'logList.dart';
 
 class RiotWidget extends StatelessWidget {
   static const String _title = 'RIoT';
@@ -211,79 +214,3 @@ Widget _scrollableTextField(BuildContext context) => Consumer<Riot>(
             riot.subscribe(text.split("\n").where((e) => e != "").toSet());
           },
         ));
-
-// Sample: 項目が動的なListView
-// Sample: Firebaseデータ取得(ソート、index指定)
-class LogWidget extends StatefulWidget {
-  LogWidget({Key key}) : super(key: key);
-
-  @override
-  LogWidgetState createState() => LogWidgetState();
-}
-
-class LogItem extends ChangeNotifier {
-  Widget child;
-
-  LogItem(Widget w) {
-    child = w;
-  }
-
-  void setWidget(Widget w) {
-    child = w;
-    notifyListeners();
-  }
-}
-
-class LogWidgetState extends State<LogWidget> {
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<Riot>(
-      builder: (_, riot, __) => ListView.builder(
-          reverse: true,
-          itemBuilder: (context, index) {
-            // とにかくMutableなWidgetを先に返し、内容は後で埋める
-            LogItem logItem = LogItem(Text("loading..."));
-            Widget p= ChangeNotifierProvider(
-              create: (context) => logItem,
-              child: MutableWidget(),
-
-            );
-
-
-            riot.getLog(index).then((Log log) {
-              if (log != null) {
-                String dt = log.datetime.toString();
-                String t = log.topic;
-                String msg = log.msg;
-                logItem.setWidget(Text("$index: $dt [$t] $msg"));
-              } else {
-                logItem.setWidget(Text("$index: no data"));
-              }
-            });
-          /*  return ChangeNotifierProvider(
-              create: (context) => logItem,
-              child: MutableWidget(),
-            );*/
-            return p;
-          }),
-    );
-  }
-}
-
-class MutableWidget extends StatefulWidget {
-  MutableWidget({Key key}) : super(key: key);
-
-  Widget mutableWidget = Text("loading..");
-
-  @override
-  MutableWidgetState createState() => MutableWidgetState();
-}
-
-class MutableWidgetState extends State<MutableWidget> {
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<LogItem>(
-      builder: (_, logItem, __) => logItem.child,
-    );
-  }
-}
