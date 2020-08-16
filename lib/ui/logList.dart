@@ -6,14 +6,14 @@ import 'package:riot/schema/log.dart';
 
 // Sample: 項目が動的なListView
 // Sample: Firebaseデータ取得(ソート、index指定)
-class LogWidget extends StatefulWidget {
-  LogWidget({Key key}) : super(key: key);
+class LogView extends StatefulWidget {
+  LogView({Key key}) : super(key: key);
 
   @override
-  LogWidgetState createState() => LogWidgetState();
+  LogViewState createState() => LogViewState();
 }
 
-class LogWidgetState extends State<LogWidget> {
+class LogViewState extends State<LogView> {
   @override
   Widget build(BuildContext context) {
     return Consumer<Riot>(
@@ -33,18 +33,14 @@ class LogWidgetState extends State<LogWidget> {
                 String dt = log.datetime.toString();
                 String t = log.topic;
                 String msg = log.msg;
-                logItem.setWidget(Container(
-                  color: Colors.grey[350],
-                  margin: EdgeInsets.symmetric(vertical: 0.5, horizontal: 0.0),
-                  padding: EdgeInsets.all(5.0),
-                  child: Row(
-                    children: <Widget>[
-                      //Text("$index: "),
-                      Text("$dt "),
-                      Expanded(child: Text("$t ")),
-                      Expanded(child: Text("$msg")),
-                    ],
-                  ),
+                logItem.setWidget(Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: <Widget>[
+                    //Text("$index: "),
+                    Text("$dt"),
+                    Expanded(child: Text("$t")),
+                    Expanded(child: Text("$msg")),
+                  ],
                 ));
               } else {
                 logItem.setWidget(Text("$index: no data"));
@@ -70,9 +66,9 @@ class MutableWidgetContent extends ChangeNotifier {
 }
 
 class MutableWidget extends StatefulWidget {
-  MutableWidget({Key key}) : super(key: key);
+  MutableWidget();
 
-  ChangeNotifier notifire;
+  MutableWidgetContent notifire;
   Widget mutableWidget = Text("loading..");
 
   @override

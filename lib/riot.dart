@@ -10,7 +10,6 @@ import './firebase.dart';
 import './schema/log.dart';
 
 // RIoTアプリケーションロジック
-
 class Riot extends ChangeNotifier {
   String brokerUrl;
   String log = "";
@@ -25,6 +24,7 @@ class Riot extends ChangeNotifier {
 
   MyFirebase _db = MyFirebase();
   Future<Log> _dbMutex = null;
+
 
   Riot() {
     _getPastLog(["#"]);
@@ -152,17 +152,18 @@ class Riot extends ChangeNotifier {
 
 
   void reloadLog() {
-    _logList=List<Log>();
+    _logList = List<Log>();
     notifyListeners();
   }
+
   // Sample: firebase (ソートとindex)
   // Sample: 非同期関数のチェイン実行
-  Future<Log> getLog(int index)  {
+  Future<Log> getLog(int index) {
     if (_dbMutex == null) {
       _dbMutex = _getLog(index);
     } else {
       // ignore: missing_return
-      _dbMutex = _dbMutex.then((_)  {
+      _dbMutex = _dbMutex.then((_) {
         return _getLog(index);
       });
     };
@@ -174,7 +175,10 @@ class Riot extends ChangeNotifier {
     if (index < _logList.length) return _logList[index]; //キャッシュにあればそのまま返す
 
     // キャッシュになければDBから取得
-    int marker = _logList.length == 0 ? DateTime.now().toUtc().millisecondsSinceEpoch : _logList[_logList.length - 1]
+    int marker = _logList.length == 0 ? DateTime
+        .now()
+        .toUtc()
+        .millisecondsSinceEpoch : _logList[_logList.length - 1]
         .timestamp; // 取得リストの開始点。キャッシュリストの末尾のtimestamp以降. キャッシュリスト空ならtimestanmp>=0(すべて)
     print("getLog() index=$index  Logs: ${_logList.length} After: $marker");
     await _db
