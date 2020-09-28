@@ -15,7 +15,7 @@ https://qiita.com/kuboon/items/f424b84c718619460c6f
 ## プロジェクト履歴
 
 1. flutter SDKの設置
-    > 略
+    > [参考:Windows向け] (https://flutter.dev/docs/get-started/install/windows)
 
 2. flutterのターゲットにwebを追加
     > flutter config --enable-web
@@ -28,6 +28,7 @@ https://qiita.com/kuboon/items/f424b84c718619460c6f
 
 ## Intelli-J設定
 - Flutter plugin導入
+- Settings > Framwork > Flutter > パスを入力
 
 ## パッケージ追加
 - pubspec.yaml を編集
